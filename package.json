@@ -1,0 +1,20 @@
+{
+  "name": "clean-ddd",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest --run"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.5"
+  },
+  "dependencies": {
+    "dayjs": "^1.11.13"
+  }
+}
