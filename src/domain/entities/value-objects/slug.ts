@@ -11,7 +11,7 @@ export class Slug {
             .trim()
             .replace(/\s+/g, '')
             .replace(/[^\w]+/g, '')
-            .replace(/\_\-+/g, '-')
+            .replace(/_-+/g, '-')
             .replace(/^--/, '-')
             .replace(/-$/, '')
 

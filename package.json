@@ -3,15 +3,25 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "vitest --run"
+    "test": "vitest --run",
+    "lint": "npx eslint -c eslint.config.js src/**/*.ts",
+    "lint:fix": "npx eslint -c eslint.config.js src/**/*.ts --fix"
   },
+  "type": "module",
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@eslint/js": "^9.15.0",
     "@types/node": "^22.9.0",
+    "eslint": "9.14.0",
+    "eslint-config-prettier": "^9.1.0",
+    "globals": "^15.12.0",
+    "prettier": "3.3.3",
     "typescript": "^5.6.3",
+    "typescript-eslint": "^8.14.0",
+    "vite-tsconfig-paths": "^5.1.2",
     "vitest": "^2.1.5"
   },
   "dependencies": {

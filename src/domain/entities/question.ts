@@ -1,4 +1,3 @@
-import { randomUUID } from "crypto"
 import { Slug } from "./value-objects/slug"
 import { Entity } from "../../core/entities/entity"
 import { UniqueEntityId } from "./value-objects/unique-entity-id"
@@ -16,7 +15,7 @@ interface QuestionProps {
 }
 
 export class Question extends Entity<QuestionProps> {
-    static create(props: Optional<QuestionProps, 'createdAt'>, id?: string) {
+    static create(props: Optional<QuestionProps, 'createdAt'>) {
         const question = new Question({
             ...props,
             slug: Slug.createFromText(props.title),
@@ -54,7 +53,26 @@ export class Question extends Entity<QuestionProps> {
         return this.props.updatedAt;
     }
 
-    isNew() {
+    get Slug() {
+        return this.props.slug;
+    }
+
+    get isNew() {
         return dayjs().diff(this.createdAt) <= 3
+    }
+
+    set content(content: string) {
+        this.props.content = content;
+        this.touch();
+    }
+
+    set title(title: string) {
+        this.props.title = title;
+        this.props.slug = Slug.createFromText(title);
+        this.touch();
+    }
+
+    private touch() {
+        this.props.updatedAt = new Date();
     }
 }

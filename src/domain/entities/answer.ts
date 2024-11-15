@@ -12,6 +12,7 @@ interface AnswerProps {
 }
 
 export class Answer extends Entity<AnswerProps> {
+
     get content() {
         return this.props.content
     }
@@ -32,7 +33,25 @@ export class Answer extends Entity<AnswerProps> {
         return this.props.updatedAt
     }
 
-    static create(props: Optional<AnswerProps, 'createdAt'>, id?: UniqueEntityId) {
+    private touch() {
+        this.props.updatedAt = new Date();
+    }
+
+    getExcerpt(content: string) {
+        return content.substring(0, 120).concat('...')
+    }
+
+    set content(content: string) {
+        this.props.content = content;
+        this.touch();
+    }
+
+    set title(title: string) {
+        this.title = title;
+        this.touch();
+    }
+
+    static create(props: Optional<AnswerProps, 'createdAt'>) {
         const answer = new Answer({
             ...props,
             createdAt: new Date(),
