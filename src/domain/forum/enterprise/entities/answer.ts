@@ -1,5 +1,5 @@
-import { Entity } from "../../core/entities/entity"
-import { Optional } from "../../core/types/optional"
+import { Entity } from "@/core/entities/entity"
+import { Optional } from "@/core/types/optional"
 import { UniqueEntityId } from "./value-objects/unique-entity-id"
 
 
