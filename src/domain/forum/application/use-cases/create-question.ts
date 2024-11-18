@@ -3,6 +3,7 @@ import { AnswersRepository } from '@/domain/forum/application/repositories/answe
 import { Answer } from '@/domain/forum/enterprise/entities/answer';
 import { Question } from '../../enterprise/entities/question';
 import { QuestionRepository } from '../repositories/question-repository';
+import { Slug } from '../../enterprise/entities/value-objects/slug';
 
 
 interface CreateQuestionUseCaseRequest {

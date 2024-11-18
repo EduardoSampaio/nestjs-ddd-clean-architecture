@@ -15,12 +15,12 @@ interface QuestionProps {
 }
 
 export class Question extends Entity<QuestionProps> {
-    static create(props: Optional<QuestionProps, 'createdAt'>) {
+    static create(props: Optional<QuestionProps, 'createdAt' | 'slug'>, id?: UniqueEntityId) {
         const question = new Question({
             ...props,
-            slug: Slug.createFromText(props.title),
+            slug: props.slug ?? Slug.createFromText(props.title),
             createdAt: new Date(),
-        });
+        }, id);
 
         return question;
     }
