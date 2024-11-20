@@ -45,6 +45,10 @@ export class Question extends Entity<QuestionProps> {
         return this.props.bestAnswerId;
     }
 
+    set bestAnswerId(value: UniqueEntityId | undefined) {
+        this.props.bestAnswerId = value;
+    }
+
     get createdAt() {
         return this.props.createdAt;
     }
