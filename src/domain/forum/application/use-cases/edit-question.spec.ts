@@ -50,7 +50,7 @@ describe('Edit Question By Id', () => {
 
         await fakeRepository.create(newQuestion);
 
-        expect(() => {
+        await expect(() => {
             return sut.execute({
                 authorId: 'author-1',
                 questionId: 'question-1',

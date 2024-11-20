@@ -40,7 +40,7 @@ describe('Delete Answer By Id', () => {
 
         await fakeRepository.create(newAnswer);
 
-        expect(() => {
+        await expect(() => {
             return sut.execute({ authorId: 'author-1', answerId: 'answer-1' })
         }).rejects.toBeInstanceOf(Error);
 
