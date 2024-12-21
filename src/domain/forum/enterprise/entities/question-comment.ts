@@ -5,20 +5,27 @@ import { UniqueEntityId } from "./value-objects/unique-entity-id"
 
 interface QuestionCommentsProps {
     authorId: UniqueEntityId
-    questionId?: UniqueEntityId,
+    questionId: UniqueEntityId,
     content: string,
     createdAt: Date,
     updatedAt?: Date
 }
 
 export class QuestionComment extends Entity<QuestionCommentsProps> {
+
     static create(props: Optional<QuestionCommentsProps, 'createdAt'>, id?: UniqueEntityId) {
-        const question = new QuestionComment({
+        const questionComment = new QuestionComment({
             ...props,
             createdAt: props.createdAt ?? new Date(),
         }, id);
+        return questionComment;
+    }
+    get questionId() {
+        return this.props.questionId;
+    }
 
-        return question;
+    set questionId(questionId: UniqueEntityId) {
+        this.props.questionId = questionId
     }
 
     get content() {
