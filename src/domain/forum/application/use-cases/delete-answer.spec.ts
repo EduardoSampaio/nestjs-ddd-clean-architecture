@@ -4,6 +4,7 @@ import { Answer } from '../../enterprise/entities/answer';
 import { faker } from '@faker-js/faker'
 import { DeleteAnswerUseCase } from './delete-answer';
 import { InMemoryAnswerRepository } from 'test/in-memory-anwser-repository';
+import { NotAllowedError } from './errors/not-allowed-error';
 
 describe('Delete Answer By Id', () => {
     let fakeRepository: InMemoryAnswerRepository;
@@ -39,11 +40,10 @@ describe('Delete Answer By Id', () => {
         }, new UniqueEntityId('answer-1'))
 
         await fakeRepository.create(newAnswer);
+        const result = await sut.execute({ authorId: 'author-1', answerId: 'answer-1' });
 
-        await expect(() => {
-            return sut.execute({ authorId: 'author-1', answerId: 'answer-1' })
-        }).rejects.toBeInstanceOf(Error);
-
+        expect(result.isLeft()).toBe(true)
+        expect(result.value).toBeInstanceOf(NotAllowedError)
     })
 
 })

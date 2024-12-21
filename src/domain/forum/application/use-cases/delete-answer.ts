@@ -1,13 +1,15 @@
 
 import { Either, left, right } from "@/core/either";
 import { AnswersRepository } from "../repositories/answers-repository";
+import { ResourceNotFoundError } from "./errors/resource-not-found";
+import { NotAllowedError } from "./errors/not-allowed-error";
 
 interface DeleteAnswerUseCaseRequest {
     authorId: string
     answerId: string
 }
 
-type DeleteAnswerUseCaseResponse = Either<string, {}>
+type DeleteAnswerUseCaseResponse = Either<ResourceNotFoundError | NotAllowedError, {}>
 
 export class DeleteAnswerUseCase {
     constructor(private answerRepository: AnswersRepository) { }
@@ -15,11 +17,11 @@ export class DeleteAnswerUseCase {
         const answer = await this.answerRepository.findById(answerId);
 
         if (!answer) {
-            return left('Answer not found');
+            return left(new ResourceNotFoundError());
         }
 
         if (answer.authorId.toValue !== authorId) {
-            return left('Not allowed');
+            return left(new NotAllowedError());
         }
 
         await this.answerRepository.delete(answer)

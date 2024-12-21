@@ -7,6 +7,14 @@ class Left<L> {
     constructor(value: L) {
         this.value = value
     }
+
+    isRight(): boolean {
+        return false;
+    }
+
+    isLeft(): boolean {
+        return true;
+    }
 }
 
 /**
@@ -17,6 +25,14 @@ class Right<R> {
 
     constructor(value: R) {
         this.value = value
+    }
+
+    isRight(): boolean {
+        return true;
+    }
+
+    isLeft(): boolean {
+        return false;
     }
 }
 
