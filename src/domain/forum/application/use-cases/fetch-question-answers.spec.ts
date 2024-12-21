@@ -2,8 +2,6 @@
 import { InMemoryAnswerRepository } from "test/in-memory-anwser-repository"
 import { FetchQuestionAnswersUseCase } from "./fetch-question-answers"
 import { AnswersRepository } from "../repositories/answers-repository"
-import { title } from "process"
-import { Slug } from "../../enterprise/entities/value-objects/slug"
 import { UniqueEntityId } from "../../enterprise/entities/value-objects/unique-entity-id"
 import { Answer } from "../../enterprise/entities/answer"
 
