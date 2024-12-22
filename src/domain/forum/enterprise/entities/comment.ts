@@ -1,43 +1,37 @@
-import { Entity } from "@/core/entities/entity"
-import { Optional } from "@/core/types/optional"
-import dayjs from "dayjs"
-import { UniqueEntityId } from "./value-objects/unique-entity-id"
+import { Entity } from '@/core/entities/entity'
+import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 
 export interface CommentProps {
-    authorId: UniqueEntityId
-    content: string,
-    createdAt: Date,
-    updatedAt?: Date
+  authorId: UniqueEntityId
+  content:string
+  created_at:Date
+  updated_at?:Date
 }
 
 export abstract class Comment<Props extends CommentProps> extends Entity<Props> {
+  get content() {
+    return this.props.content
+  }
 
-    get content() {
-        return this.props.content;
-    }
+  get authorId() {
+    return this.props.authorId
+  }
 
-    get authorId() {
-        return this.props.authorId;
-    }
+  get created_at() {
+    return this.props.created_at
+  }
 
-    get createdAt() {
-        return this.props.createdAt;
-    }
+  get updated_at() {
+    return this.props.updated_at
+  }
 
-    get updatedAt() {
-        return this.props.updatedAt;
-    }
+  private touch() {
+    this.props.updated_at = new Date()
+  }
 
-    get isNew() {
-        return dayjs().diff(this.createdAt) <= 3
-    }
+  set content(content: string) {
+    this.props.content = content
+    this.touch
+  }
 
-    set content(content: string) {
-        this.props.content = content;
-        this.touch();
-    }
-
-    private touch() {
-        this.props.updatedAt = new Date();
-    }
 }

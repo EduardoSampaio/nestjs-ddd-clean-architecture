@@ -1,25 +1,23 @@
 import { Entity } from "@/core/entities/entity";
-import { UniqueEntityId } from "./value-objects/unique-entity-id";
+import { UniqueEntityId } from "@/core/entities/unique-entity-id";
 
 interface AttachmentProps {
-    title: string;
-    link: string;
-    
+  title:string
+  link:string
 }
 
+export class Attachment extends Entity<AttachmentProps>{
+  get title(){
+    return this.props.title
+  }
 
-export class Attachment extends Entity<AttachmentProps> {
+  get link(){
+    return this.props.link
+  }
 
-    get title() {
-        return this.props.title;
-    }
+  static create(props:AttachmentProps, id?:UniqueEntityId){
+    const attachment = new Attachment(props,id)
 
-    get link() {
-        return this.props.link;
-    }
-
-    static create(props: AttachmentProps, id?: UniqueEntityId) {
-        return new Attachment(props, id);
-    }
-
+    return attachment
+  }
 }

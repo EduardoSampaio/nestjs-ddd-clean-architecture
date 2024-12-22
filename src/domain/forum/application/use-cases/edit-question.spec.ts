@@ -1,64 +1,81 @@
-import { Slug } from '../../enterprise/entities/value-objects/slug';
-import { UniqueEntityId } from '../../enterprise/entities/value-objects/unique-entity-id';
-import { InMemoryQuestionsRepository } from 'test/in-memory-questions-repository';
-import { Question } from '../../enterprise/entities/question';
-import { faker } from '@faker-js/faker'
-import { EditQuestionUseCase } from './edit-question';
+import { UniqueEntityId } from '@/core/entities/unique-entity-id'
+import { NotAllowedError } from '@/core/errors/errors/not-allowed-error'
+import { makeQuestion } from 'test/factories/make-question'
+import { makeQuestionAttachments } from 'test/factories/make-question-attachments'
+import { InMemoryQuestionAttachmentsRepositories } from 'test/repositories/in-memory-question-attachments-repository'
+import { InMemoryQuestionsRepositories } from 'test/repositories/in-memory-questions-repository'
+import { EditQuestionUseCase } from './edit-question'
 
-describe('Edit Question By Id', () => {
-    let fakeRepository: InMemoryQuestionsRepository;
-    let sut: EditQuestionUseCase;
+let inMemoryQuestionsRepositories : InMemoryQuestionsRepositories
+let inMemoryQuestionAttachmentRepositories : InMemoryQuestionAttachmentsRepositories
+let sut : EditQuestionUseCase
+describe('Edit Question', () => {
+  beforeEach(() => {
+    inMemoryQuestionAttachmentRepositories = new InMemoryQuestionAttachmentsRepositories()
+    inMemoryQuestionsRepositories =  new InMemoryQuestionsRepositories(inMemoryQuestionAttachmentRepositories)
+    sut = new EditQuestionUseCase(inMemoryQuestionsRepositories,inMemoryQuestionAttachmentRepositories)
 
-    beforeEach(() => {
-        fakeRepository = new InMemoryQuestionsRepository();
-        sut = new EditQuestionUseCase(fakeRepository);
+  })
+  
+  it('should be able to edit a question', async () => {
+    const newQuestion = makeQuestion({
+      authorId: new UniqueEntityId('author-1')
+    }, new UniqueEntityId('question1'));
+
+    console.log(newQuestion)
+    
+    await inMemoryQuestionsRepositories.create(newQuestion)
+
+    inMemoryQuestionAttachmentRepositories.items.push(
+      makeQuestionAttachments({
+        questionId:newQuestion.id,
+        attachmentId: new UniqueEntityId('1'),
+      }),
+      makeQuestionAttachments({
+        questionId:newQuestion.id,
+        attachmentId: new UniqueEntityId('2'),
+      })
+    )
+  
+    await sut.execute({
+      authorId:'author-1',
+      title:'Pergunta teste',
+      content:'Conteudo teste',
+      questionId: newQuestion.id.toValue(),
+      attachmentsIds: ['1', '3']
+    })
+  
+    expect(inMemoryQuestionsRepositories.items[0]).toMatchObject({
+      title:'Pergunta teste',
+      content:'Conteudo teste',
+    })
+    expect(inMemoryQuestionsRepositories.items[0].attachments.currentItems).toHaveLength(2)
+    expect(inMemoryQuestionsRepositories.items[0].attachments.currentItems).toEqual([
+      expect.objectContaining({ attachmentId: new UniqueEntityId('1') }),
+      expect.objectContaining({ attachmentId: new UniqueEntityId('3') }),
+    ])
+  })
+
+
+  it('should not be able to edit a question from another user', async () => {
+    const newQuestion = makeQuestion({
+      authorId: new UniqueEntityId('author-1')
+    }, new UniqueEntityId('question1'));
+
+    console.log(newQuestion)
+    
+    await inMemoryQuestionsRepositories.create(newQuestion)
+    const result = await sut.execute({
+    authorId:'author-2',
+    title:'Pergunta teste',
+    content:'Conteudo teste',
+    questionId: newQuestion.id.toValue(),
+    attachmentsIds: []
     })
 
-    test('Should edit a question by id', async () => {
-
-        const newQuestion = Question.create({
-            title: faker.lorem.sentences(),
-            slug: Slug.create('pergunta-1'),
-            authorId: new UniqueEntityId('author-1'),
-            content: faker.lorem.text(),
-        }, new UniqueEntityId('question-1'))
-
-        await fakeRepository.create(newQuestion);
-
-        await sut.execute({
-            authorId: 'author-1',
-            questionId: 'question-1',
-            title: 'Pergunta 2',
-            content: 'Conteudo 2',
-        });
-
-        expect(fakeRepository.items[0]).toMatchObject({
-            title: 'Pergunta 2',
-            content: 'Conteudo 2',
-        });
-    })
-
-
-    test('Should not edit a question by id', async () => {
-
-        const newQuestion = Question.create({
-            title: faker.lorem.sentences(),
-            slug: Slug.create('pergunta-1'),
-            authorId: new UniqueEntityId('author-2'),
-            content: faker.lorem.text(),
-        }, new UniqueEntityId('question-1'))
-
-        await fakeRepository.create(newQuestion);
-
-        await expect(() => {
-            return sut.execute({
-                authorId: 'author-1',
-                questionId: 'question-1',
-                title: faker.lorem.sentences(),
-                content: faker.lorem.text(),
-            });
-        }).rejects.toBeInstanceOf(Error);
-
-    })
-
+  expect(result.isLeft()).toBe(true)
+  expect(result.value).toBeInstanceOf(NotAllowedError)
+  })
+  
 })
+

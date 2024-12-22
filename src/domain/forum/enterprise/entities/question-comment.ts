@@ -1,59 +1,32 @@
-import { Entity } from "@/core/entities/entity"
-import { Optional } from "@/core/types/optional"
-import dayjs from "dayjs"
-import { UniqueEntityId } from "./value-objects/unique-entity-id"
+import { UniqueEntityId } from '@/core/entities/unique-entity-id'
+import { Optional } from '@/core/types/optional'
+import { Comment, CommentProps } from './comment'
 
-interface QuestionCommentsProps {
-    authorId: UniqueEntityId
-    questionId: UniqueEntityId,
-    content: string,
-    createdAt: Date,
-    updatedAt?: Date
+export interface QuestionCommentProps extends CommentProps{
+ questionId:string
 }
 
-export class QuestionComment extends Entity<QuestionCommentsProps> {
+export class QuestionComment extends Comment<QuestionCommentProps> {
 
-    static create(props: Optional<QuestionCommentsProps, 'createdAt'>, id?: UniqueEntityId) {
-        const questionComment = new QuestionComment({
-            ...props,
-            createdAt: props.createdAt ?? new Date(),
-        }, id);
-        return questionComment;
-    }
-    get questionId() {
-        return this.props.questionId;
-    }
+  get questionId(){
+    return this.props.questionId
+  }
 
-    set questionId(questionId: UniqueEntityId) {
-        this.props.questionId = questionId
-    }
+  static create(
+    props: Optional<QuestionCommentProps, 'created_at'>,
+    id?: UniqueEntityId,
+  ) {
+    const questionComment = new QuestionComment(
+      {
+        ...props,
+        created_at: props.created_at ?? new Date(),
+      },
+      id,
+    )
 
-    get content() {
-        return this.props.content;
-    }
-
-    get authorId() {
-        return this.props.authorId;
-    }
-
-    get createdAt() {
-        return this.props.createdAt;
-    }
-
-    get updatedAt() {
-        return this.props.updatedAt;
-    }
-
-    get isNew() {
-        return dayjs().diff(this.createdAt) <= 3
-    }
-
-    set content(content: string) {
-        this.props.content = content;
-        this.touch();
-    }
-
-    private touch() {
-        this.props.updatedAt = new Date();
-    }
+    return questionComment
+  }
 }
+
+
+

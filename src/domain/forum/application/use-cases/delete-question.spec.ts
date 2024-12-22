@@ -1,51 +1,68 @@
-import { Slug } from '../../enterprise/entities/value-objects/slug';
-import { UniqueEntityId } from '../../enterprise/entities/value-objects/unique-entity-id';
-import { InMemoryQuestionsRepository } from 'test/in-memory-questions-repository';
-import { Question } from '../../enterprise/entities/question';
-import { faker } from '@faker-js/faker'
-import { DeleteQuestionUseCase } from './delete-question';
+import { UniqueEntityId } from '@/core/entities/unique-entity-id'
+import { NotAllowedError } from '@/core/errors/errors/not-allowed-error'
+import { makeQuestion } from 'test/factories/make-question'
+import { makeQuestionAttachments } from 'test/factories/make-question-attachments'
+import { InMemoryQuestionAttachmentsRepositories } from 'test/repositories/in-memory-question-attachments-repository'
+import { InMemoryQuestionsRepositories } from 'test/repositories/in-memory-questions-repository'
+import { DeleteQuestionUseCase } from './delete-question'
 
-describe('Delete Question By Id', () => {
-    let fakeRepository: InMemoryQuestionsRepository;
-    let sut: DeleteQuestionUseCase;
+let inMemoryQuestionsRepositories : InMemoryQuestionsRepositories
+let inMemoryQuestionAttachmentsRepositories : InMemoryQuestionAttachmentsRepositories
+let sut : DeleteQuestionUseCase
+describe('Delete Question', () => {
+  beforeEach(() => {
+    inMemoryQuestionAttachmentsRepositories = new InMemoryQuestionAttachmentsRepositories()
+    inMemoryQuestionsRepositories =  new InMemoryQuestionsRepositories(inMemoryQuestionAttachmentsRepositories)
+    sut = new DeleteQuestionUseCase(inMemoryQuestionsRepositories)
 
-    beforeEach(() => {
-        fakeRepository = new InMemoryQuestionsRepository();
-        sut = new DeleteQuestionUseCase(fakeRepository);
+  })
+  
+  it('should be able to delete a question', async () => {
+    const newQuestion = makeQuestion({
+      authorId: new UniqueEntityId('author-1')
+    }, new UniqueEntityId('question1'));
+
+    console.log(newQuestion)
+    
+    await inMemoryQuestionsRepositories.create(newQuestion)
+
+    inMemoryQuestionAttachmentsRepositories.items.push(
+      makeQuestionAttachments({
+        questionId:newQuestion.id,
+        attachmentId: new UniqueEntityId('1'),
+      }),
+      makeQuestionAttachments({
+        questionId:newQuestion.id,
+        attachmentId: new UniqueEntityId('2'),
+      })
+    )
+  
+    await sut.execute({
+      questionId: 'question1',
+      authorId:'author-1'
     })
+  
+    expect(inMemoryQuestionsRepositories.items).toHaveLength(0)
+    expect(inMemoryQuestionAttachmentsRepositories.items).toHaveLength(0)
+  })
 
-    test('Should delete a question by id', async () => {
+  it('should not be able to delete a question from another user', async () => {
+    const newQuestion = makeQuestion({
+      authorId: new UniqueEntityId('author-1')
+    }, new UniqueEntityId('question1'));
 
-        const newQuestion = Question.create({
-            title: faker.lorem.sentences(),
-            slug: Slug.create('pergunta-1'),
-            authorId: new UniqueEntityId('author-1'),
-            content: faker.lorem.text(),
-        }, new UniqueEntityId('question-1'))
+    console.log(newQuestion)
+    
+    await inMemoryQuestionsRepositories.create(newQuestion)
 
-        await fakeRepository.create(newQuestion);
+  const result = await sut.execute({
+    questionId: 'question1',
+    authorId:'author-2'
+  })
 
-        await sut.execute({ authorId: 'author-1', questionId: 'question-1' });
-
-        expect(fakeRepository.items).toHaveLength(0);
-    })
-
-
-    test('Should not delete a question by id', async () => {
-
-        const newQuestion = Question.create({
-            title: faker.lorem.sentences(),
-            slug: Slug.create('pergunta-1'),
-            authorId: new UniqueEntityId('author-2'),
-            content: faker.lorem.text(),
-        }, new UniqueEntityId('question-1'))
-
-        await fakeRepository.create(newQuestion);
-
-        await expect(() => {
-            return sut.execute({ authorId: 'author-1', questionId: 'question-1' })
-        }).rejects.toBeInstanceOf(Error);
-
-    })
-
+    expect(result.isLeft()).toBe(true)
+    expect(result.value).toBeInstanceOf(NotAllowedError)
+  })
+  
 })
+

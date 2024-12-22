@@ -1,34 +1,49 @@
-import { UniqueEntityId } from '@/domain/forum/enterprise/entities/value-objects/unique-entity-id';
-import { AnswersRepository } from '@/domain/forum/application/repositories/answers-repository';
-import { Answer } from '@/domain/forum/enterprise/entities/answer';
-import { Question } from '../../enterprise/entities/question';
-import { QuestionRepository } from '../repositories/question-repository';
-import { Slug } from '../../enterprise/entities/value-objects/slug';
 
+import { Either, right } from '@/core/either';
+import { UniqueEntityId } from '@/core/entities/unique-entity-id';
+import { Question } from '../../enterprise/entities/question';
+import { QuestionAttachmentList } from '../../enterprise/entities/question-attachemnt-list';
+import { QuestionAttachment } from '../../enterprise/entities/question-attachment';
+import { QuestionsRepository } from '../repositories/questions-repository';
 
 interface CreateQuestionUseCaseRequest {
-    authorId: string
-    title: string
-    content: string
+  authorId:string
+  title:string
+  content:string
+  attachmentsIds: string[]
 }
 
-interface CreateQuestionUseCaseResponse {
-    question: Question
-}
+type CreateQuestionUseCaseResponse = Either <null, {
+  question:Question
+}>
+
 
 export class CreateQuestionUseCase {
-    constructor(private questionsRepository: QuestionRepository) { }
-    async execute({ title, authorId, content }: CreateQuestionUseCaseRequest): Promise<CreateQuestionUseCaseResponse> {
-        const question = Question.create({
-            authorId: new UniqueEntityId(authorId),
-            content,
-            title
-        });
+  constructor(private questionRepository: QuestionsRepository) {}
 
-        await this.questionsRepository.create(question);
+  async execute({
+    authorId,
+    title,
+    content,
+    attachmentsIds
+  }: CreateQuestionUseCaseRequest):Promise<CreateQuestionUseCaseResponse> {
+    const question = Question.create({
+      authorId: new UniqueEntityId(),
+      title,
+      content
+    })
 
-        return {
-            question
-        };
-    }
+    const questionAttachments = attachmentsIds.map((attachmentId) => {
+      return QuestionAttachment.create({
+        attachmentId: new UniqueEntityId(attachmentId),
+        questionId: question.id,
+      })
+    })
+
+    question.attachments = new QuestionAttachmentList(questionAttachments)
+
+    await this.questionRepository.create(question)
+
+    return right({question})
+  }
 }

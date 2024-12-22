@@ -1,49 +1,72 @@
+import { UniqueEntityId } from '@/core/entities/unique-entity-id'
 
-import { UniqueEntityId } from '../../enterprise/entities/value-objects/unique-entity-id';
-import { Answer } from '../../enterprise/entities/answer';
-import { faker } from '@faker-js/faker'
-import { DeleteAnswerUseCase } from './delete-answer';
-import { InMemoryAnswerRepository } from 'test/in-memory-anwser-repository';
-import { NotAllowedError } from './errors/not-allowed-error';
+import { makeAnswer } from 'test/factories/make-answer'
+import { makeAnswerAttachments } from 'test/factories/make-answer-attachments'
+import { InMemoryAnswerAttachmentsRepositories } from 'test/repositories/in-memory-answer-attachments-repository'
+import { InMemoryAnswersRepositories } from 'test/repositories/in-memory-answers-repository'
 
-describe('Delete Answer By Id', () => {
-    let fakeRepository: InMemoryAnswerRepository;
-    let sut: DeleteAnswerUseCase;
+import { NotAllowedError } from '@/core/errors/errors/not-allowed-error'
+import { DeleteAnswerUseCase } from './delete-answer'
 
-    beforeEach(() => {
-        fakeRepository = new InMemoryAnswerRepository();
-        sut = new DeleteAnswerUseCase(fakeRepository);
+
+let inMemoryAnswersRepositories : InMemoryAnswersRepositories
+let inMemoryAnswerAttachmentsRepositories: InMemoryAnswerAttachmentsRepositories
+let sut : DeleteAnswerUseCase
+describe('Delete Answer', () => {
+  beforeEach(() => {
+    inMemoryAnswerAttachmentsRepositories = new InMemoryAnswerAttachmentsRepositories()
+    inMemoryAnswersRepositories =  new InMemoryAnswersRepositories(inMemoryAnswerAttachmentsRepositories)
+    sut = new DeleteAnswerUseCase(inMemoryAnswersRepositories)
+
+  })
+  
+  it('should be able to delete a answer', async () => {
+    const newAnswer = makeAnswer({
+      authorId: new UniqueEntityId('author-1')
+    }, new UniqueEntityId('answer1'));
+
+    console.log(newAnswer)
+    
+    await inMemoryAnswersRepositories.create(newAnswer)
+
+    inMemoryAnswerAttachmentsRepositories.items.push(
+      makeAnswerAttachments({
+        answerId:newAnswer.id,
+        attachmentId: new UniqueEntityId('1'),
+      }),
+      makeAnswerAttachments({
+        answerId:newAnswer.id,
+        attachmentId: new UniqueEntityId('2'),
+      })
+    )
+  
+    await sut.execute({
+      answerId: 'answer1',
+      authorId:'author-1'
     })
+  
+    expect(inMemoryAnswersRepositories.items).toHaveLength(0)
+    expect(inMemoryAnswerAttachmentsRepositories.items).toHaveLength(0)
+  })
 
-    test('Should delete a answer by id', async () => {
+  it('should not be able to delete a answer from another user', async () => {
+    const newAnswer = makeAnswer({
+      authorId: new UniqueEntityId('author-1')
+    }, new UniqueEntityId('answer1'));
 
-        const newAnswer = Answer.create({
-            authorId: new UniqueEntityId('author-1'),
-            content: faker.lorem.text(),
-            questionId: new UniqueEntityId('question-1'),
-        }, new UniqueEntityId('answer-1'))
+    console.log(newAnswer)
+    
+    await inMemoryAnswersRepositories.create(newAnswer)
 
-        await fakeRepository.create(newAnswer);
-
-        await sut.execute({ authorId: 'author-1', answerId: 'answer-1' });
-
-        expect(fakeRepository.items).toHaveLength(0);
+    const result = await sut.execute({
+      answerId: 'answer1',
+      authorId:'author-2'
     })
-
-
-    test('Should not delete a answer by id', async () => {
-
-        const newAnswer = Answer.create({
-            authorId: new UniqueEntityId('author-2'),
-            content: faker.lorem.text(),
-            questionId: new UniqueEntityId('question-1'),
-        }, new UniqueEntityId('answer-1'))
-
-        await fakeRepository.create(newAnswer);
-        const result = await sut.execute({ authorId: 'author-1', answerId: 'answer-1' });
-
-        expect(result.isLeft()).toBe(true)
-        expect(result.value).toBeInstanceOf(NotAllowedError)
-    })
-
+  
+    expect(result.isLeft()).toBe(true)
+    expect(result.value).toBeInstanceOf(NotAllowedError)
+  
+  })
+  
 })
+

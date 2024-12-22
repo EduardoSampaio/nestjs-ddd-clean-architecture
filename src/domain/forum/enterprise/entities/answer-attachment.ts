@@ -1,22 +1,23 @@
-import { UniqueEntityId } from './value-objects/unique-entity-id';
-import { Entity } from '@/core/entities/entity';
+import { Entity } from "@/core/entities/entity"
+import { UniqueEntityId } from "@/core/entities/unique-entity-id"
 
-interface AnswerAttachmentProps {
-    answerId: UniqueEntityId;
-    attachmentId: UniqueEntityId;
+export interface AnswerAttachmentProps {
+  answerId: UniqueEntityId
+  attachmentId: UniqueEntityId
 }
 
-export class AnswerAttachment extends Entity<AnswerAttachmentProps> {
+export class AnswerAttachment extends Entity<AnswerAttachmentProps>{
+  get answerId(){
+    return this.props.answerId
+  }
 
-    getanswerId() {
-        return this.props.answerId;
-    }
+  get attachmentId(){
+    return this.props.attachmentId
+  }
 
-    get attachmentId() {
-        return this.props.attachmentId;
-    }
+  static create(props:AnswerAttachmentProps, id?:UniqueEntityId){
+    const answerAttachment = new AnswerAttachment(props,id)
 
-    static create(props: AnswerAttachmentProps, id?: UniqueEntityId) {
-        return new AnswerAttachment(props, id);
-    }
+    return answerAttachment
+  }
 }
