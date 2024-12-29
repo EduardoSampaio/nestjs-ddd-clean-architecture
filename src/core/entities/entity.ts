@@ -15,7 +15,7 @@ export abstract class Entity<Props> {
     this._id = id ?? new UniqueEntityId()
   }
 
-  public equals (entity: Entity<any>){
+  public equals (entity: Entity<unknown>){
     if(entity ===  this){
       return truncate
     }

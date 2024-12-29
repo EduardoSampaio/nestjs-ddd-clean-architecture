@@ -3,13 +3,13 @@ import { UniqueEntityId } from '../entities/unique-entity-id'
 import { DomainEvent } from './domain-event'
 
 
-type DomainEventCallback = (event: any) => void
+type DomainEventCallback = (event: unknow) => void
 
 export class DomainEvents {
   private static handlersMap: Record<string, DomainEventCallback[]> = {}
-  private static markedAggregates: AggregateRoot<any>[] = []
+  private static markedAggregates: AggregateRoot<unknow>[] = []
 
-  public static markAggregateForDispatch(aggregate: AggregateRoot<any>) {
+  public static markAggregateForDispatch(aggregate: AggregateRoot<unknow>) {
     const aggregateFound = !!this.findMarkedAggregateByID(aggregate.id)
 
     if (!aggregateFound) {
@@ -17,12 +17,12 @@ export class DomainEvents {
     }
   }
 
-  private static dispatchAggregateEvents(aggregate: AggregateRoot<any>) {
+  private static dispatchAggregateEvents(aggregate: AggregateRoot<unknow>) {
     aggregate.domainEvents.forEach((event: DomainEvent) => this.dispatch(event))
   }
 
   private static removeAggregateFromMarkedDispatchList(
-    aggregate: AggregateRoot<any>,
+    aggregate: AggregateRoot<unknow>,
   ) {
     const index = this.markedAggregates.findIndex((a) => a.equals(aggregate))
 
@@ -31,7 +31,7 @@ export class DomainEvents {
 
   private static findMarkedAggregateByID(
     id: UniqueEntityId,
-  ): AggregateRoot<any> | undefined {
+  ): AggregateRoot<unknow> | undefined {
     return this.markedAggregates.find((aggregate) => aggregate.id.equals(id))
   }
 

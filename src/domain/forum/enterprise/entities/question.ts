@@ -66,12 +66,12 @@ export class Question extends AggregateRoot<QuestionProps> {
   set title(title: string) {
     this.props.title = title
     this.props.slug = Slug.createFromText(title)
-    this.touch
+    this.touch();
   }
 
   set content(content: string) {
     this.props.content = content
-    this.touch
+    this.touch();
   }
 
   set bestAnswerId(bestAnswerId: UniqueEntityId | undefined) {
@@ -84,12 +84,12 @@ export class Question extends AggregateRoot<QuestionProps> {
     }
     
     this.props.bestAnswerId = bestAnswerId
-    this.touch
+    this.touch();
   }
 
   set attachments(attachments: QuestionAttachmentList) {
     this.props.attachments = attachments
-    this.touch
+    this.touch();
   }
   static create(
     props: Optional<QuestionProps, 'created_at' | 'slug' | 'attachments'>,

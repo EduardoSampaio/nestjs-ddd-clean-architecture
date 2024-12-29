@@ -31,7 +31,7 @@ export abstract class Comment<Props extends CommentProps> extends Entity<Props> 
 
   set content(content: string) {
     this.props.content = content
-    this.touch
+    this.touch();
   }
 
 }

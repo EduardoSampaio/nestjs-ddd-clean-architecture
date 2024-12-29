@@ -19,7 +19,6 @@ export class SendNotificationUseCase {
   constructor(private notificationRepository: NotificationsRepository) {}
 
   async execute({
-    recipientId,
     title,
     content,
     
