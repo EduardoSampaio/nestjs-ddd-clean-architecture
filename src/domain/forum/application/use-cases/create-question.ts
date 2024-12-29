@@ -22,7 +22,6 @@ export class CreateQuestionUseCase {
   constructor(private questionRepository: QuestionsRepository) {}
 
   async execute({
-    authorId,
     title,
     content,
     attachmentsIds
